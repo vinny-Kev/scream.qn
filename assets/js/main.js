@@ -44,24 +44,24 @@ document.addEventListener('DOMContentLoaded',function(){
     setTimeout(()=>{ if(circle && circle.parentNode) circle.parentNode.removeChild(circle); },900);
   });
 
-  // Intercept internal link clicks to run a fade-out transition before navigation
+ 
   document.addEventListener('click', (e)=>{
     const a = e.target.closest('a');
     if(!a) return;
     const href = a.getAttribute('href');
     if(!href) return;
-    // only intercept same-origin page navigation (relative links)
+
     if(href.startsWith('http') || href.startsWith('mailto:') || a.target === '_blank') return;
     e.preventDefault();
-    // add overlay
+ 
     let overlay = document.querySelector('.page-transition-overlay');
     if(!overlay){ overlay = document.createElement('div'); overlay.className = 'page-transition-overlay'; document.body.appendChild(overlay); }
-    // animate out
+    
     requestAnimationFrame(()=> overlay.classList.remove('page-hidden'));
     setTimeout(()=>{ window.location.href = href; }, 320);
   });
   
-  // TikTok embed fallback: if the embed script doesn't inject an iframe,
+ 
   // keep the poster visible; hide poster when iframe appears.
   (function(){
     const tiktokWrap = document.querySelector('.tiktok-embed-wrap');
