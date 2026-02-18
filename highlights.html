@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Highlights — Maria Sofia Dimaculangan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <style>
+    /* ─── Page intro ─────────────────────────────────────── */
+    .highlights-intro {
+      max-width: 60ch;
+      margin-bottom: 3rem;
+    }
+    .highlights-intro h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin: 0 0 .75rem;
+      line-height: 1.15;
+    }
+    .highlights-intro p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ─── Grid ───────────────────────────────────────────── */
+    .vid-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.4rem;
+    }
+
+    /* ─── Video card ─────────────────────────────────────── */
+    .vid-card {
+      position: relative;
+      background: #0d0d0d;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+      transition: transform 280ms cubic-bezier(.2,.9,.3,1), box-shadow 280ms cubic-bezier(.2,.9,.3,1);
+      cursor: pointer;
+    }
+    .vid-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 18px 42px rgba(0,0,0,0.7);
+    }
+
+    /* ─── Thumbnail state ────────────────────────────────── */
+    .vid-thumb {
+      position: relative;
+      width: 100%;
+      /* 9:16 aspect, phone-style portrait */
+      aspect-ratio: 9 / 16;
+      background: #111;
+      overflow: hidden;
+      border-radius: 16px 16px 0 0;
+    }
+    /* Gradient poster using the game brand colour */
+    .vid-thumb-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--card-grad, linear-gradient(160deg,#1a1a1a,#0a0a0a));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .vid-thumb-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: .06em;
+    }
+    .vid-thumb-platform {
+      font-size: .7rem;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    /* Play button */
+    .play-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .play-btn svg {
+      width: 60px;
+      height: 60px;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
+      transition: transform 200ms ease, opacity 200ms ease;
+    }
+    .vid-card:hover .play-btn svg {
+      transform: scale(1.1);
+    }
+
+    /* Tap to load label */
+    .load-hint {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.7);
+      font-size: .72rem;
+      padding: 5px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      letter-spacing: .06em;
+      z-index: 3;
+    }
+
+    /* ─── Embed state ────────────────────────────────────── */
+    .vid-embed-wrap {
+      display: none;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      position: relative;
+      background: #000;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+    }
+    .vid-embed-wrap .tiktok-embed,
+    .vid-embed-wrap iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+      display: block;
+    }
+    /* Loading spinner shown while TikTok initialises */
+    .embed-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d0d0d;
+      z-index: 1;
+      transition: opacity 300ms ease;
+    }
+    .embed-loading.gone { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: rgba(255,255,255,0.55);
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Active state: hide thumb, show embed */
+    .vid-card.active .vid-thumb { display: none; }
+    .vid-card.active .vid-embed-wrap { display: block; }
+
+    /* ─── Stats bar ──────────────────────────────────────── */
+    .vid-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .75rem 1rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      background: #0d0d0d;
+    }
+    .stat-group {
+      display: flex;
+      gap: .9rem;
+    }
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .78rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .stat svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      opacity: .7;
+    }
+    .stat strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ─── Game label chip ────────────────────────────────── */
+    .vid-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .55rem 1rem .8rem;
+      background: #0d0d0d;
+    }
+    .game-label {
+      font-family: 'Playfair Display', serif;
+      font-size: .82rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.45);
+    }
+    .tiktok-link {
+      font-size: .7rem;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      text-decoration: none;
+      transition: color 180ms ease;
+    }
+    .tiktok-link:hover { color: rgba(255,255,255,0.6); }
+    /* kill the underline pseudo-element from global a::after */
+    .tiktok-link::after { display: none !important; }
+
+    /* ─── Section header accent line ─────────────────────── */
+    .section-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: .6rem;
+    }
+    .section-eyebrow span {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      color: rgba(255,255,255,0.3);
+    }
+    .section-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .vid-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html">Maria Sofia<br><span>Dimaculangan</span></a>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle">☰</button>
+    </div>
+  </header>
+
+  <main class="container section">
+
+    <div class="section-eyebrow"><span>Portfolio</span></div>
+
+    <div class="highlights-intro">
+      <h1>Short-form Content Highlights</h1>
+      <p>A selection of viral and high-performing TikToks from my game marketing work. Tap any card to play.</p>
+    </div>
+
+    <div class="vid-grid" id="vidGrid">
+
+      <!-- ── Scream Queen #1 ────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@scream.qn/video/7348229643314416902"
+           data-id="7348229643314416902"
+           data-handle="@scream.qn"
+           data-game="Tenebris Somnia"
+           data-views="1.2M"
+           data-likes="2.5K"
+           data-comments="31"
+           data-shares="122"
+           style="--card-grad: linear-gradient(160deg,#1a0a0a,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">Tenebris Somnia</span>
+            <span class="vid-thumb-platform">TikTok · @scream.qn</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+              <path d="M26 20l20 12-20 12V20z" fill="white"/>
+            </svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat">
+              <!-- eye icon -->
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg>
+              <strong>1.2M</strong>
+            </span>
+            <span class="stat">
+              <!-- heart icon -->
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>
+              <strong>2.5K</strong>
+            </span>
+            <span class="stat">
+              <!-- share icon -->
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg>
+              <strong>122</strong>
+            </span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">Tenebris Somnia</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@scream.qn/video/7348229643314416902" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── Scream Queen #2 ────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@scream.qn/video/7605964803181448469"
+           data-id="7605964803181448469"
+           data-handle="@scream.qn"
+           data-game="Scream Queen"
+           data-views="847K"
+           data-likes="14.3K"
+           data-comments="210"
+           data-shares="580"
+           style="--card-grad: linear-gradient(160deg,#0f0a1a,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">Scream Queen</span>
+            <span class="vid-thumb-platform">TikTok · @scream.qn</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>847K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>14.3K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>580</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">Scream Queen</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@scream.qn/video/7605964803181448469" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── Vorax ──────────────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@voraxgame/video/7224775116473879813"
+           data-id="7224775116473879813"
+           data-handle="@voraxgame"
+           data-game="Vorax"
+           data-views="320K"
+           data-likes="8.1K"
+           data-comments="143"
+           data-shares="290"
+           style="--card-grad: linear-gradient(160deg,#0a1208,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">Vorax</span>
+            <span class="vid-thumb-platform">TikTok · @voraxgame</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>320K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>8.1K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>290</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">Vorax</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@voraxgame/video/7224775116473879813" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── Tormentor ──────────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@tormentorgame/video/7504238527559879958"
+           data-id="7504238527559879958"
+           data-handle="@tormentorgame"
+           data-game="Tormentor"
+           data-views="512K"
+           data-likes="19.7K"
+           data-comments="388"
+           data-shares="1.1K"
+           style="--card-grad: linear-gradient(160deg,#1a0800,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">Tormentor</span>
+            <span class="vid-thumb-platform">TikTok · @tormentorgame</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>512K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>19.7K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>1.1K</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">Tormentor</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@tormentorgame/video/7504238527559879958" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── A.A.U. Blacksite ───────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@aaublacksite/video/7572215029081115911"
+           data-id="7572215029081115911"
+           data-handle="@aaublacksite"
+           data-game="A.A.U. Blacksite"
+           data-views="90K"
+           data-likes="3.2K"
+           data-comments="87"
+           data-shares="204"
+           style="--card-grad: linear-gradient(160deg,#08101a,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">A.A.U. Blacksite</span>
+            <span class="vid-thumb-platform">TikTok · @aaublacksite</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>90K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>3.2K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>204</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">A.A.U. Blacksite</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@aaublacksite/video/7572215029081115911" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── Stalcraft #1 ───────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@stalcraft_official/video/7338849406298492167"
+           data-id="7338849406298492167"
+           data-handle="@stalcraft_official"
+           data-game="STALCRAFT"
+           data-views="640K"
+           data-likes="22.4K"
+           data-comments="512"
+           data-shares="1.8K"
+           style="--card-grad: linear-gradient(160deg,#0d1008,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">STALCRAFT</span>
+            <span class="vid-thumb-platform">TikTok · @stalcraft_official</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>640K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>22.4K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>1.8K</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">STALCRAFT</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@stalcraft_official/video/7338849406298492167" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── Stalcraft #2 ───────────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@stalcraft_official/video/7373623427334278408"
+           data-id="7373623427334278408"
+           data-handle="@stalcraft_official"
+           data-game="STALCRAFT"
+           data-views="430K"
+           data-likes="11.9K"
+           data-comments="287"
+           data-shares="930"
+           style="--card-grad: linear-gradient(160deg,#101008,#080808)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">STALCRAFT</span>
+            <span class="vid-thumb-platform">TikTok · @stalcraft_official</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>430K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>11.9K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>930</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">STALCRAFT</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@stalcraft_official/video/7373623427334278408" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+      <!-- ── World of Sea Battle ────────────────────── -->
+      <div class="vid-card"
+           data-url="https://www.tiktok.com/@worldofseabattle_game/video/7598557051341655328"
+           data-id="7598557051341655328"
+           data-handle="@worldofseabattle_game"
+           data-game="World of Sea Battle"
+           data-views="215K"
+           data-likes="6.4K"
+           data-comments="118"
+           data-shares="345"
+           style="--card-grad: linear-gradient(160deg,#08101a,#050810)">
+        <div class="vid-thumb">
+          <div class="vid-thumb-bg">
+            <span class="vid-thumb-logo">World of Sea Battle</span>
+            <span class="vid-thumb-platform">TikTok · @worldofseabattle_game</span>
+          </div>
+          <div class="play-btn">
+            <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/><path d="M26 20l20 12-20 12V20z" fill="white"/></svg>
+          </div>
+          <span class="load-hint">Tap to play</span>
+        </div>
+        <div class="vid-embed-wrap">
+          <div class="embed-loading"><div class="spinner"></div></div>
+        </div>
+        <div class="vid-stats">
+          <div class="stat-group">
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C5 4 1.3 8 1.3 10S5 16 10 16s8.7-4 8.7-6-3.7-6-8.7-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><strong>215K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg><strong>6.4K</strong></span>
+            <span class="stat"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"/></svg><strong>345</strong></span>
+          </div>
+        </div>
+        <div class="vid-footer">
+          <span class="game-label">World of Sea Battle</span>
+          <a class="tiktok-link" href="https://www.tiktok.com/@worldofseabattle_game/video/7598557051341655328" target="_blank" rel="noopener">↗ TikTok</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© Maria Sofia Dimaculangan</div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // Track whether TikTok embed.js has already been injected
+    let tiktokScriptInjected = false;
+
+    function injectTikTokScript() {
+      if (tiktokScriptInjected) {
+        // Script already in DOM — call tiktok's reload if available
+        if (window.tiktok && typeof window.tiktok.reload === 'function') {
+          window.tiktok.reload();
+        }
+        return;
+      }
+      tiktokScriptInjected = true;
+      var s = document.createElement('script');
+      s.src = 'https://www.tiktok.com/embed.js';
+      s.async = true;
+      document.body.appendChild(s);
+    }
+
+    function activateCard(card) {
+      if (card.classList.contains('active')) return; // already loaded
+
+      var url    = card.dataset.url;
+      var id     = card.dataset.id;
+      var handle = card.dataset.handle;
+      if (!url || !id) return;
+
+      // Switch UI state
+      card.classList.add('active');
+
+      // Build the blockquote TikTok expects
+      var embedWrap = card.querySelector('.vid-embed-wrap');
+      var blockquote = document.createElement('blockquote');
+      blockquote.className = 'tiktok-embed';
+      blockquote.setAttribute('cite', url);
+      blockquote.setAttribute('data-video-id', id);
+      // TikTok's script needs at least one <a> child
+      var a = document.createElement('a');
+      a.target = '_blank';
+      a.href = url;
+      a.textContent = handle;
+      blockquote.appendChild(a);
+
+      // Insert before the loading spinner div (which is first child)
+      embedWrap.insertBefore(blockquote, embedWrap.firstChild);
+
+      // Inject / re-trigger TikTok embed.js
+      injectTikTokScript();
+
+      // Watch for the iframe TikTok injects so we can hide the spinner
+      var loadingEl = embedWrap.querySelector('.embed-loading');
+      if (loadingEl) {
+        var mo = new MutationObserver(function () {
+          var iframe = embedWrap.querySelector('iframe');
+          if (iframe) {
+            mo.disconnect();
+            // Give iframe a moment to paint before hiding spinner
+            setTimeout(function () {
+              loadingEl.classList.add('gone');
+            }, 400);
+          }
+        });
+        mo.observe(embedWrap, { childList: true, subtree: true });
+
+        // Fallback: hide spinner after 8 s regardless
+        setTimeout(function () {
+          loadingEl.classList.add('gone');
+        }, 8000);
+      }
+    }
+
+    // Bind click on each card (thumb area triggers it)
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.vid-card').forEach(function (card) {
+        var thumb = card.querySelector('.vid-thumb');
+        if (thumb) {
+          thumb.addEventListener('click', function () { activateCard(card); });
+          thumb.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              activateCard(card);
+            }
+          });
+          thumb.setAttribute('tabindex', '0');
+          thumb.setAttribute('role', 'button');
+          thumb.setAttribute('aria-label', 'Play ' + (card.dataset.game || 'video'));
+        }
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

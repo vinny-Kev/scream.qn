@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact — Maria Sofia Dimaculangan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html">Maria Sofia<br><span>Dimaculangan</span></a>
+      <nav class="main-nav">
+        <a href="index.html">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="highlights.html">Highlights</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Contact</h1>
+    <p>If you'd like to work together or want to share screenshots and logos, email me at <a href="mailto:msofiadim.ac@gmail.com">msofiadim.ac@gmail.com</a>.</p>
+
+    <form id="contactForm" class="contact-form" action="#" novalidate>
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <label>
+        Message
+        <textarea name="message" rows="6" required></textarea>
+      </label>
+      <button type="submit" class="btn" id="contactSubmit">Send message</button>
+    </form>
+
+    <div id="contactSuccess" class="form-message success" role="alert" style="display:none;margin-top:1rem;">Thanks — your message was sent.</div>
+    <div id="contactError" class="form-message error" role="alert" style="display:none;margin-top:1rem;">Submission failed. Please try again.</div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© Maria Sofia Dimaculangan</div>
+  </footer>
+  <!-- EmailJS SDK (used by assets/js/mail.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="assets/js/mail.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

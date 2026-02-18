@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Maria Sofia Dimaculangan — Game Marketing & Social</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <style>
+    /* TikTok embed improvements: larger size, rounded corners, hide internal scrollbar, responsive heights */
+    .tiktok-embed-wrap{
+      width: min(520px, 55vw);
+      background:#fff;
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 8px 20px rgba(0,0,0,0.35);
+      margin:0 auto;
+    }
+
+    .tiktok-embed-wrap .tiktok-embed,
+    .tiktok-embed-wrap iframe,
+    .tiktok-embed-wrap .embed-fallback{
+      border-radius:14px;
+      overflow:hidden;
+      width:100% !important;
+      height:720px !important;
+    }
+
+    /* Hide scrollbars inside the embed wrapper while keeping content visible */
+    .tiktok-embed-wrap ::-webkit-scrollbar{display:none}
+    .tiktok-embed-wrap{-ms-overflow-style:none;scrollbar-width:none}
+
+    /* Ensure the hero image area centers the embed nicely */
+    .hero-mock .hero-image-wrap{display:flex;justify-content:center;align-items:flex-start}
+
+    /* Fallback poster image fits container */
+    .tiktok-embed-wrap .embed-fallback img{display:block;width:100%;height:100%;object-fit:cover;border-radius:14px}
+
+    /* Responsive adjustments */
+    @media (max-width: 1000px){
+      .tiktok-embed-wrap{width: min(420px, 60vw)}
+      .tiktok-embed-wrap .tiktok-embed,
+      .tiktok-embed-wrap iframe{height:640px !important}
+    }
+
+    @media (max-width: 640px){
+      .tiktok-embed-wrap{width: min(360px, 86vw)}
+      .tiktok-embed-wrap .tiktok-embed,
+      .tiktok-embed-wrap iframe{height:560px !important}
+    }
+
+    /* ── Hero click-to-load TikTok card ── */
+    .hero-vid-card {
+      width: min(340px, 60vw);
+      background: #0d0d0d;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 24px 56px rgba(0,0,0,0.65);
+    }
+    .hero-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/16;
+      background: #111;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+    .hero-thumb-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg,#1a0a0a,#080808);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+    .hero-thumb-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.75);
+    }
+    .hero-thumb-sub {
+      font-size: .7rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .hero-play-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-play-btn svg {
+      width: 68px;
+      height: 68px;
+      filter: drop-shadow(0 4px 18px rgba(0,0,0,0.6));
+      transition: transform 200ms ease;
+    }
+    .hero-thumb:hover .hero-play-btn svg { transform: scale(1.1); }
+    .hero-load-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.65);
+      font-size: .72rem;
+      padding: 5px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      letter-spacing: .06em;
+    }
+    .hero-embed-area {
+      width: 100%;
+      aspect-ratio: 9/16;
+      position: relative;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .hero-embed-area .tiktok-embed,
+    .hero-embed-area iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+      display: block;
+    }
+    .hero-embed-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d0d0d;
+      z-index: 1;
+      transition: opacity 300ms ease;
+    }
+    .hero-embed-loading.gone { opacity: 0; pointer-events: none; }
+    /* shared spinner */
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: rgba(255,255,255,0.55);
+      border-radius: 50%;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 900px) {
+      .hero-vid-card { width: min(300px, 80vw); }
+    }
+    @media (max-width: 640px) {
+      .hero-vid-card { width: min(260px, 86vw); }
+    }
+
+    /* Highlights badges */
+    .highlights-badges{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:18px}
+    .highlights-badges .badge{background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));color:#e8e8e8;padding:14px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 18px rgba(0,0,0,0.45);font-weight:500;min-width:220px;max-width:420px}
+    .highlights-badges .badge strong{color:#fff}
+    @media (max-width:640px){.highlights-badges .badge{min-width:unset;flex:1 1 100%}}
+
+    /* About meta badges / chips (cleaner grouped layout) */
+    .meta-badges{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+    .meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    .meta-label{color:#bfbfbf;font-weight:700;font-size:0.95rem;min-width:100px}
+    .chips-row{display:flex;flex-wrap:wrap;gap:10px}
+    .chip{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:#e6e6e6;padding:8px 12px;border-radius:999px;font-weight:500;font-size:0.95rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .chip.link{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border-color:rgba(255,255,255,0.06)}
+    .chip.contact{background:transparent;border:1px dashed rgba(255,255,255,0.04);color:#cfcfcf}
+    .chip:focus{outline:2px solid rgba(255,255,255,0.06);outline-offset:3px}
+    @media (max-width:640px){.meta-row{flex-direction:column;align-items:flex-start}.meta-label{min-width:0}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html">Maria Sofia<br><span>Dimaculangan</span></a>
+      <nav class="main-nav" id="mainNav">
+        
+        <a href="projects.html">Projects</a>
+        <a href="highlights.html">Highlights</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle">☰</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner container">
+        <div class="hero-text">
+          <h1 class="fancy">What I do</h1>
+          <p class="lead">Game marketing, social media, and content strategy tailored for indie & mid-size games — TikTok, Instagram, X, YouTube Shorts and more.</p>
+          <a href="contact.html" class="btn">Let's talk</a>
+        </div>
+        <div class="hero-mock">
+          
+          <div class="hero-image-wrap">
+            <!-- Hero TikTok: click-to-load so the page doesn't hang waiting for TikTok -->
+            <div class="hero-vid-card" id="heroVidCard">
+              <!-- Thumb / poster state -->
+              <div class="hero-thumb" id="heroThumb" tabindex="0" role="button" aria-label="Play Tenebris Somnia TikTok">
+                <div class="hero-thumb-bg">
+                  <span class="hero-thumb-title">Tenebris Somnia</span>
+                  <span class="hero-thumb-sub">TikTok · @scream.qn</span>
+                </div>
+                <div class="hero-play-btn">
+                  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="31" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                    <path d="M26 20l20 12-20 12V20z" fill="white"/>
+                  </svg>
+                </div>
+                <span class="hero-load-hint">Tap to play</span>
+              </div>
+              <!-- Embed state (hidden until clicked) -->
+              <div class="hero-embed-area" id="heroEmbedArea" style="display:none">
+                <div class="hero-embed-loading" id="heroEmbedLoading"><div class="spinner"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section about container">
+      <div class="grid">
+        <div>
+          <h2>About Me</h2>
+          <p>Hi! I’m Sofie, a game marketer, social media manager, and content strategist with 3+ years working with VR and PC titles across genres including Horror, RPG, Strategy, and Adult games. I create platform-specific content designed to engage players and grow communities.</p>
+          <div class="meta-badges" aria-label="Contact and specialties">
+            <div class="meta-row">
+              <span class="meta-label">Platforms</span>
+              <div class="chips-row">
+                <a class="chip link" href="https://www.tiktok.com/@scream.qn" target="_blank" rel="noopener">TikTok</a>
+                <a class="chip link" href="https://linke.to/screamqueen" target="_blank" rel="noopener">linke.to</a>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              <span class="meta-label">Specialties</span>
+              <div class="chips-row">
+                <div class="chip">Short-form video</div>
+                <div class="chip">Trend strategy</div>
+                <div class="chip">Community management</div>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              <span class="meta-label">Contact</span>
+              <div class="chips-row">
+                <a class="chip contact" href="mailto:msofiadim.ac@gmail.com">msofiadim.ac@gmail.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section projects">
+      <div class="container">
+        <h2>Games & Projects</h2>
+        <!-- <p class="muted">.</p> -->
+        <div class="logo-grid">
+          <!-- Uniform logo tiles. Links point to a Google search for each game (replace URLs with store/landing pages if available) -->
+          <a class="logo-link" href="https://www.google.com/search?q=STALCRAFT+game" target="_blank" rel="noopener" title="STALCRAFT">
+            <div class="logo-item">
+              <img src="assets/img/stalcraft logo.png" alt="STALCRAFT" onerror="this.src='https://via.placeholder.com/240x100?text=STALCRAFT'">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=TORMENTOR+game" target="_blank" rel="noopener" title="TORMENTOR">
+            <div class="logo-item">
+              <img src="assets/img/tormentor logo.png" alt="TORMENTOR" onerror="this.src='https://via.placeholder.com/240x100?text=TORMENTOR'">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=Blacktop+Hoops+game" target="_blank" rel="noopener" title="Blacktop Hoops">
+            <div class="logo-item">
+              <img src="assets\img\BH_Logo_Horizontal_Red.jpg" alt="Blacktop Hoops">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=AAU+Black+Site+game" target="_blank" rel="noopener" title="A.A.U. Black Site">
+            <div class="logo-item">
+              <img src="assets\img\AAU.jpg" alt="AAU Black Site">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=House+Party+game" target="_blank" rel="noopener" title="House Party">
+            <div class="logo-item">
+              <img src="assets/img/houseparty logo.png" alt="House Party" onerror="this.src='https://via.placeholder.com/240x100?text=HOUSE+PARTY'">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=World+of+Sea+Battle+game" target="_blank" rel="noopener" title="World of Sea Battle">
+            <div class="logo-item">
+              <img src="assets\img\worldofsea.jpg" alt="World of Sea Battle">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=Premier+League+Player+VR+game" target="_blank" rel="noopener" title="Premier League Player VR">
+            <div class="logo-item">
+              <img src="https://via.placeholder.com/240x100?text=PREMIER+LEAGUE+PLAYER+VR" alt="Premier League Player VR">
+            </div>
+          </a>
+
+          <a class="logo-link" href="https://www.google.com/search?q=Vorax+game" target="_blank" rel="noopener" title="Vorax">
+            <div class="logo-item">
+              <img src="assets\img\vorax.png" alt="Vorax">
+            </div>
+          </a>
+        </div>
+        <!-- <p class="muted small">Full list: STALCRAFT, TORMENTOR, BLACKTOP HOOPS, A.A.U. BLACK SITE, A GENTLEMEN'S DISPUTE, HOUSE PARTY, WORLD OF SEA BATTLE, N.O.X, PREMIER LEAGUE PLAYER VR, AKPALA, WOLCEN STUDIO, VORAX, MONACO 2, SPACE SALVAGE, JAWS OF EXTINCTION, HEXBALL VR, THIRD CRISIS, VALOR OF MAN, CONTAMINANT.</p> -->
+      </div>
+    </section>
+
+    <section id="highlights" class="section highlights container">
+      <h2>Social Media Management Highlights</h2>
+      <div class="highlights-badges" role="list">
+        <div class="badge">Achieved <strong>1M+</strong> total views on reels, TikTok, and Shorts</div>
+        <div class="badge">Executed pre-launch hype campaigns and boosted posts</div>
+        <div class="badge">Developed cross-platform campaigns and influencer collaborations</div>
+        <div class="badge">Built and moderated Discord servers, managed community events</div>
+      </div>
+    </section>
+
+    <section class="section services container">
+      <h2>Content & Trend Strategy</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Short-form Video</h3>
+          <p>Concept, script, edit, and platform-tailored formats for TikTok, Reels and Shorts.</p>
+        </div>
+        <div class="card">
+          <h3>Trend Research</h3>
+          <p>Monitor algorithm shifts and trend opportunities to keep content fresh and relevant.</p>
+        </div>
+        <div class="card">
+          <h3>Community</h3>
+          <p>Moderation, events, contests, and feedback loops between players and developers.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container foot-grid">
+      <div>
+        <strong>Maria Sofia Dimaculangan</strong>
+        <p>Game Marketing & Social Media</p>
+      </div>
+      <div>
+        <p>Email: <a href="mailto:msofiadim.ac@gmail.com">msofiadim.ac@gmail.com</a></p>
+        <p>Link: <a href="https://linke.to/screamqueen">linke.to/screamqueen</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script>
+  (function(){
+    var URL = 'https://www.tiktok.com/@scream.qn/video/7348229643314416902';
+    var ID  = '7348229643314416902';
+    var scriptInjected = false;
+
+    function injectTikTokScript(){
+      if(scriptInjected){ if(window.tiktok && window.tiktok.reload) window.tiktok.reload(); return; }
+      scriptInjected = true;
+      var s = document.createElement('script');
+      s.src = 'https://www.tiktok.com/embed.js';
+      s.async = true;
+      document.body.appendChild(s);
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var thumb    = document.getElementById('heroThumb');
+      var card     = document.getElementById('heroVidCard');
+      var area     = document.getElementById('heroEmbedArea');
+      var loading  = document.getElementById('heroEmbedLoading');
+      if(!thumb) return;
+
+      function activate(){
+        if(card.dataset.loaded) return;
+        card.dataset.loaded = '1';
+        thumb.style.display = 'none';
+        area.style.display  = 'block';
+
+        var bq = document.createElement('blockquote');
+        bq.className = 'tiktok-embed';
+        bq.setAttribute('cite', URL);
+        bq.setAttribute('data-video-id', ID);
+        var a = document.createElement('a');
+        a.target = '_blank'; a.href = URL; a.textContent = '@scream.qn';
+        bq.appendChild(a);
+        area.insertBefore(bq, area.firstChild);
+
+        injectTikTokScript();
+
+        var mo = new MutationObserver(function(){
+          if(area.querySelector('iframe')){ mo.disconnect(); setTimeout(function(){ loading.classList.add('gone'); }, 400); }
+        });
+        mo.observe(area, {childList:true, subtree:true});
+        setTimeout(function(){ loading.classList.add('gone'); }, 8000);
+      }
+
+      thumb.addEventListener('click', activate);
+      thumb.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); activate(); } });
+    });
+  })();
+  </script>
+</body>
+</html>

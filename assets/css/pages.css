@@ -1,0 +1,65 @@
+.section{padding:3rem 0}
+
+/* Animations */
+.hero, .about, .projects, .services{
+    opacity:0;
+    transform:translateY(10px);
+    animation:fadeUp .8s ease forwards;
+    animation-delay:.1s}
+@keyframes fadeUp{to{opacity:1;transform:none}}
+
+/* small tweaks */
+.fancy{letter-spacing:.02em}
+
+/* Make initial page fade smoother */
+html.modal-open, body.modal-open{
+    overflow:hidden}
+.page-enter{
+    opacity:0;
+    transform:translateY(6px)}
+.page-enter-active{
+    animation:fadeUp .6s var(--easing) forwards}
+
+/* TikTok embed responsive wrapper */
+.tiktok-embed-wrap{
+    max-width:560px; /* match the hero column width */
+    margin:0 auto;
+    border-radius:10px;
+    overflow:visible;
+    display:block;
+    position:relative;
+    /* removed strict min-width so embeds don't push layout off-screen */
+}
+.tiktok-embed-wrap .tiktok-embed,
+.tiktok-embed-wrap iframe{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    max-height:none !important;
+    position:static !important;
+}
+/* Force a taller iframe so TikTok doesn't render internal scrollbars */
+.tiktok-embed-wrap iframe{
+        height:600px !important;
+}
+
+@media (max-width:900px){
+    .tiktok-embed-wrap iframe{height:520px !important}
+}
+@media (max-width:520px){
+    .tiktok-embed-wrap iframe{height:420px !important}
+}
+.hero-image-wrap .muted{margin-top:.5rem;text-align:center}
+
+@media (
+    max-width:720px){
+    .tiktok-embed-wrap{
+        max-width:100%}
+}
+
+/* Embed fallback poster */
+.embed-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.12));}
+.embed-fallback a{display:block;width:100%;height:100%;text-decoration:none;color:inherit}
+.embed-fallback img{width:100%;height:100%;object-fit:cover;display:block}
+.embed-fallback .play-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;padding:8px 12px;border-radius:6px;font-size:.95rem}
+.embed-fallback.hidden{display:none}
