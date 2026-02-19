@@ -20,7 +20,11 @@
     display:none;
     background:none;border:0;
     color:var(--accent);
-    font-size:1.3rem}
+    font-size:1.3rem;
+    padding:6px 8px; /* increase hit area */
+    touch-action:manipulation; /* improve touch responsiveness */
+    -webkit-tap-highlight-color: transparent;
+}
 .hero{
     padding:4rem 0}
 .hero-inner{
@@ -49,7 +53,7 @@
 @media (max-width:900px){
   .hero-inner{grid-template-columns:1fr}
     .about .grid{grid-template-columns:1fr}
-  .nav-toggle{display:block}
+    .nav-toggle{display:block}
   .main-nav{
     position:fixed;
     right:0;top:64px;
@@ -58,6 +62,8 @@
     border-left:1px solid rgba(255,255,255,.03);
     display:none;
     flex-direction:column}
+    .nav-toggle{z-index:60}
+    .main-nav{z-index:55; width:min(86vw,280px);} /* ensure menu sits above content and is touch-friendly */
   .main-nav.open{
     display:flex}
   .nav-wrap{

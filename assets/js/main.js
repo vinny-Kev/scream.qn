@@ -2,8 +2,16 @@ document.addEventListener('DOMContentLoaded',function(){
   const navToggle = document.getElementById('navToggle');
   const mainNav = document.getElementById('mainNav');
   if(navToggle){
-    navToggle.addEventListener('click',()=>{
-      mainNav.classList.toggle('open');
+    // accessibility: link toggle to the menu and keep state in aria attributes
+    navToggle.setAttribute('aria-controls', 'mainNav');
+    navToggle.setAttribute('aria-expanded', 'false');
+    if(mainNav) mainNav.setAttribute('aria-hidden', 'true');
+
+    navToggle.addEventListener('click', ()=>{
+      if(!mainNav) return;
+      const isOpen = mainNav.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      mainNav.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
     });
   }
 
